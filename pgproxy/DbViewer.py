@@ -35,3 +35,29 @@ class DbViewer:
                 defined_schemas = list(map(lambda s: s[0], cursor.fetchall()))
 
             return defined_schemas
+
+    def procs(self, schema):
+        with self.connection.cursor() as cursor:
+            cursor.execute("""SELECT routine_schema As schema_name,
+                            routine_name As procedure_name
+                            FROM information_schema.routines
+                            WHERE routine_type = 'PROCEDURE'
+                            AND routine_schema = %s;""", (schema,))
+            procs = list(map(lambda s: s[1], cursor.fetchall()))
+        return procs
+
+    def args(self, schema, proc):
+        with self.connection.cursor() as cursor:
+            cursor.execute("""select 
+                                args.parameter_name::text,
+                                args.data_type::text,
+                                args.parameter_mode::text
+                            from information_schema.routines proc
+                            left join information_schema.parameters args
+                                      on proc.specific_schema = args.specific_schema
+                                      and proc.specific_name = args.specific_name
+                            where proc.routine_schema = %s
+                                and (proc.routine_type = 'PROCEDURE' or proc.routine_type = 'FUNCTION')
+                                and (proc.routine_name = %s);""", (schema, proc))
+            args = cursor.fetchall()
+        return args
