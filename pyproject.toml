@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "pgproxy"
+version = "0.1.0"
+description = ""
+authors = ["Ihor Yarovyy <Ihor.Yarovyy@ukr.net>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+toml = "^0.10.2"
+click = "^8.1.7"
+psycopg2 = {extras = ["binary"], version = "^2.9.9"}
+
+[tool.poetry.scripts]
+pgproxy = "pgproxy.main:cli"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

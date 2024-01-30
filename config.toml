@@ -1,0 +1,19 @@
+[database]
+host = "localhost"
+port = "5432"
+name = "ihor"
+user = "ihor"
+password = ""
+
+[schemas]
+#pattern = "api%"
+#procPattern = "%%"
+
+[schemas.api]
+#pattern = "%%"
+proc = ["one", "two"]
+
+[schemas.dict]
+pattern = "%%"
+#tables = ["one", "two"]
+
