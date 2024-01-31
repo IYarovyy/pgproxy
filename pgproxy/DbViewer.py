@@ -37,12 +37,32 @@ class DbViewer:
             return defined_schemas
 
     def procs(self, schema):
+        defined_procs = self.config.get(fields.SCHEMAS_FIELD).get(schema).get(fields.PROC_FIELD)
+
+        proc_pattern = self.config.get(fields.SCHEMAS_FIELD).get(schema).get(fields.PATTERN_FIELD) \
+                       or self.config.get(fields.SCHEMAS_FIELD).get(fields.PROC_PATTERN_FIELD)
+
         with self.connection.cursor() as cursor:
-            cursor.execute("""SELECT routine_schema As schema_name,
+            if defined_procs:
+                cursor.execute("""SELECT routine_schema As schema_name,
                             routine_name As procedure_name
                             FROM information_schema.routines
                             WHERE routine_type = 'PROCEDURE'
-                            AND routine_schema = %s;""", (schema,))
+                            AND routine_name = ANY(%s)
+                            AND routine_schema = %s;""", (defined_procs, schema))
+            elif proc_pattern:
+                cursor.execute("""SELECT routine_schema As schema_name,
+                            routine_name As procedure_name
+                            FROM information_schema.routines
+                            WHERE routine_type = 'PROCEDURE'
+                            AND routine_name LIKE %s
+                            AND routine_schema = %s;""", (proc_pattern, schema))
+            else:
+                cursor.execute("""SELECT routine_schema As schema_name,
+                                routine_name As procedure_name
+                                FROM information_schema.routines
+                                WHERE routine_type = 'PROCEDURE'
+                                AND routine_schema = %s;""", (schema,))
             procs = list(map(lambda s: s[1], cursor.fetchall()))
         return procs
 

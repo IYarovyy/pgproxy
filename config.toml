@@ -7,11 +7,11 @@ password = ""
 
 [schemas]
 #pattern = "api%"
-#procPattern = "%%"
+#procPattern = "%----%"
 
 [schemas.api]
-#pattern = "%%"
-proc = ["one", "two"]
+pattern = "common%"
+proc = ["one", "common_user_insert"]
 
 [schemas.dict]
 pattern = "%%"
