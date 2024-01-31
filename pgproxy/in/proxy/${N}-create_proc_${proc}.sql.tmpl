@@ -1,0 +1,14 @@
+CREATE OR REPLACE PROCEDURE ${schema}.${proc}(
+  % for arg in args:
+    %if arg[2]=="IN":
+      ${arg[0]}, ${arg[1]}${'' if loop.last else ','}
+    %endif
+	%endfor
+	)
+language plpgsql
+as $$
+begin
+	insert into users (department, urole, first_name, second_name, email)
+	values (1, 'chief', u_first_name, u_first_name, u_second_name, u_email);
+
+end;$$

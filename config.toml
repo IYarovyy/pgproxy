@@ -9,11 +9,11 @@ password = ""
 #pattern = "api%"
 #procPattern = "%----%"
 
-[schemas.api]
-pattern = "common%"
-proc = ["one", "common_user_insert"]
+#[schemas.api]
+#pattern = "common%"
+#proc = ["one", "common_user_insert"]
 
-[schemas.dict]
-pattern = "%%"
+#[schemas.dict]
+#pattern = "%%"
 #tables = ["one", "two"]
 

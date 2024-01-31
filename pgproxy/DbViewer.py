@@ -37,10 +37,10 @@ class DbViewer:
             return defined_schemas
 
     def procs(self, schema):
-        defined_procs = self.config.get(fields.SCHEMAS_FIELD).get(schema).get(fields.PROC_FIELD)
+        defined_procs = self.config.get(fields.SCHEMAS_FIELD, {}).get(schema, {}).get(fields.PROC_FIELD)
 
-        proc_pattern = self.config.get(fields.SCHEMAS_FIELD).get(schema).get(fields.PATTERN_FIELD) \
-                       or self.config.get(fields.SCHEMAS_FIELD).get(fields.PROC_PATTERN_FIELD)
+        proc_pattern = self.config.get(fields.SCHEMAS_FIELD, {}).get(schema, {}).get(fields.PATTERN_FIELD) \
+                       or self.config.get(fields.SCHEMAS_FIELD, {}).get(fields.PROC_PATTERN_FIELD)
 
         with self.connection.cursor() as cursor:
             if defined_procs:
