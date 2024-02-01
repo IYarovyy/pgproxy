@@ -1,5 +1,6 @@
 import os
-import placeholders
+
+from .placeholders import *
 from mako.template import Template
 
 
@@ -18,39 +19,39 @@ class TemplateProcessor:
                 scope[schema] = {}
                 for root, dirs, files in os.walk(self.in_folder):
                     for file in files:
-                        if placeholders.is_schema_related_only(file):
+                        if is_schema_related_only(file):
                             n = n + 1
-                            new_file_path = root.replace(self.in_folder, self.out_folder)
-                            new_file_name = placeholders.interpret_name(file, n, schema)
+                            new_file_path = root.replace(self.in_folder, self.out_folder, 1)
+                            new_file_name = interpret_name(file, n, schema)
                             os.makedirs(new_file_path, exist_ok=True)
                             with open(os.path.join(new_file_path, new_file_name), "w") as new_file:
                                 file_template = Template(filename=os.path.join(root, file))
-                                new_file.write(file_template.render(**{placeholders.SCHEMA: schema}))
+                                new_file.write(file_template.render(**{SCHEMA: schema}))
 
             for proc in procs:
                 args = self.db_viewer.args(schema, proc)
                 scope[schema][proc] = args
                 for root, dirs, files in os.walk(self.in_folder):
                     for file in files:
-                        if placeholders.is_proc_related(file):
+                        if is_proc_related(file):
                             n = n + 1
-                            new_file_path = root.replace(self.in_folder, self.out_folder)
-                            new_file_name = placeholders.interpret_name(file, n, schema, proc)
+                            new_file_path = root.replace(self.in_folder, self.out_folder, 1)
+                            new_file_name = interpret_name(file, n, schema, proc)
                             os.makedirs(new_file_path, exist_ok=True)
                             with open(os.path.join(new_file_path, new_file_name), "w") as new_file:
                                 file_template = Template(filename=os.path.join(root, file))
                                 new_file.write(file_template.render(
-                                    **{placeholders.SCHEMA: schema,
-                                       placeholders.PROC: proc,
-                                       placeholders.ARGS: args,
+                                    **{SCHEMA: schema,
+                                       PROC: proc,
+                                       ARGS: args,
                                        }))
         for root, dirs, files in os.walk(self.in_folder):
             for file in files:
-                if placeholders.is_after_all(file):
+                if is_after_all(file):
                     n = n + 1
-                    new_file_path = root.replace(self.in_folder, self.out_folder)
-                    new_file_name = placeholders.interpret_name(file, n)
+                    new_file_path = root.replace(self.in_folder, self.out_folder, 1)
+                    new_file_name = interpret_name(file, n)
                     os.makedirs(new_file_path, exist_ok=True)
                     with open(os.path.join(new_file_path, new_file_name), "w") as new_file:
                         file_template = Template(filename=os.path.join(root, file))
-                        new_file.write(file_template.render(**{placeholders.SCOPE: scope}))
+                        new_file.write(file_template.render(**{SCOPE: scope}))

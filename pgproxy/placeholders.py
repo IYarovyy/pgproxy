@@ -33,4 +33,4 @@ def is_proc_related(name):
 def is_after_all(name):
     return name.count(ph(SCHEMA)) == 0 \
         and name.count(ph(PROC)) == 0 \
-        and name.count(ph(AFTER_ALL_MARKER)) == 1
+        and name.count(ph(AFTER_ALL_MARKER)) > 0
