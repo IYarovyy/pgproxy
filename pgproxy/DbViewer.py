@@ -1,4 +1,6 @@
 import pgproxy.config as fields
+from pgproxy.models.arg import Arg
+from pgproxy.models.proc import Proc
 
 
 class DbViewer:
@@ -42,28 +44,26 @@ class DbViewer:
         proc_pattern = self.config.get(fields.SCHEMAS_FIELD, {}).get(schema, {}).get(fields.PATTERN_FIELD) \
                        or self.config.get(fields.SCHEMAS_FIELD, {}).get(fields.PROC_PATTERN_FIELD)
 
+        select_query = "SELECT routine_schema As schema_name, " \
+                       "routine_name As procedure_name, " \
+                       "routine_type As procedure_type, " \
+                       "routine_definition As procedure_definition, " \
+                       "data_type As data_type " \
+                       "FROM information_schema.routines """
+
         with self.connection.cursor() as cursor:
             if defined_procs:
-                cursor.execute("""SELECT routine_schema As schema_name,
-                            routine_name As procedure_name
-                            FROM information_schema.routines
-                            WHERE routine_type = 'PROCEDURE'
-                            AND routine_name = ANY(%s)
-                            AND routine_schema = %s;""", (defined_procs, schema))
+                cursor.execute("{} WHERE (routine_type = 'PROCEDURE' OR routine_type = 'FUNCTION')"
+                               " AND routine_name = ANY(%s) "
+                               "AND routine_schema = %s;".format(select_query), (defined_procs, schema))
             elif proc_pattern:
-                cursor.execute("""SELECT routine_schema As schema_name,
-                            routine_name As procedure_name
-                            FROM information_schema.routines
-                            WHERE routine_type = 'PROCEDURE'
-                            AND routine_name LIKE %s
-                            AND routine_schema = %s;""", (proc_pattern, schema))
+                cursor.execute("{} WHERE (routine_type = 'PROCEDURE' OR routine_type = 'FUNCTION')"
+                               "AND routine_name LIKE %s "
+                               "AND routine_schema = %s;".format(select_query), (proc_pattern, schema))
             else:
-                cursor.execute("""SELECT routine_schema As schema_name,
-                                routine_name As procedure_name
-                                FROM information_schema.routines
-                                WHERE routine_type = 'PROCEDURE'
-                                AND routine_schema = %s;""", (schema,))
-            procs = list(map(lambda s: s[1], cursor.fetchall()))
+                cursor.execute("{} WHERE (routine_type = 'PROCEDURE' OR routine_type = 'FUNCTION') "
+                               "AND routine_schema = %s;".format(select_query), (schema,))
+            procs = list(map(lambda s: Proc(s[0], s[1], s[2], s[3], s[4]), cursor.fetchall()))
         return procs
 
     def args(self, schema, proc):
@@ -78,6 +78,6 @@ class DbViewer:
                                       and proc.specific_name = args.specific_name
                             where proc.routine_schema = %s
                                 and (proc.routine_type = 'PROCEDURE' or proc.routine_type = 'FUNCTION')
-                                and (proc.routine_name = %s);""", (schema, proc))
-            args = cursor.fetchall()
+                                and (proc.routine_name = %s);""", (schema, proc.name))
+            args = list(map(lambda s: Arg(s[0], s[1], s[2]), cursor.fetchall()))
         return args

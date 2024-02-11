@@ -1,4 +1,5 @@
 import os
+from dataclasses import replace
 
 from .placeholders import *
 from mako.template import Template
@@ -30,19 +31,23 @@ class TemplateProcessor:
 
             for proc in procs:
                 args = self.db_viewer.args(schema, proc)
-                scope[schema][proc] = args
+                rich_proc = replace(proc, args=args)
+                scope[schema] = rich_proc
+
+                print(rich_proc.get_record_fields())
+
                 for root, dirs, files in os.walk(self.in_folder):
                     for file in files:
                         if is_proc_related(file):
                             n = n + 1
                             new_file_path = root.replace(self.in_folder, self.out_folder, 1)
-                            new_file_name = interpret_name(file, n, schema, proc)
+                            new_file_name = interpret_name(file, n, schema, rich_proc.name)
                             os.makedirs(new_file_path, exist_ok=True)
                             with open(os.path.join(new_file_path, new_file_name), "w") as new_file:
                                 file_template = Template(filename=os.path.join(root, file))
                                 new_file.write(file_template.render(
                                     **{SCHEMA: schema,
-                                       PROC: proc,
+                                       PROC: rich_proc,
                                        ARGS: args,
                                        }))
         for root, dirs, files in os.walk(self.in_folder):
