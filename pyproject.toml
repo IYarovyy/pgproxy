@@ -12,6 +12,7 @@ click = "^8.1.7"
 psycopg2 = {extras = ["binary"], version = "^2.9.9"}
 mako = "^1.3.2"
 psycopg2-binary = "^2.9.9"
+rich = "^13.7.0"
 
 [tool.poetry.scripts]
 pgproxy = "pgproxy.main:cli"

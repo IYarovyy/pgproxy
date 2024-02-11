@@ -5,10 +5,68 @@ CREATE OR REPLACE PROCEDURE ${schema}.${proc.name}(
     %endif
 	%endfor
 	)
-language plpgsql
-as $$
-begin
-	insert into users (department, urole, first_name, second_name, email)
-	values (1, 'chief', u_first_name, u_first_name, u_second_name, u_email);
+%if (type(proc.data_type) == str) and (proc.data_type.lower() == 'record'):
+  RETURNS SETOF record AS
+  $body$
+  DECLARE
+   jresult JSON;
+   _result RECORD;
+  BEGIN
+   jresult=api.tm(
+   json_build_object(
+    'action','${schema}.${proc.name}',
+    'params', json_build_object(
+     % for arg in proc.args:
+       %if arg.mode=="IN":
+        '${arg.name}',${arg.name},
+       %endif
+     %endfor
+    )
+    )
+   );
 
-end;$$
+   for _result in select
+   % for field in proc.get_record_fields():
+      %if field.mode=="OUT":
+         ${field.name}${'' if loop.last else ','}
+      %endif
+   %endfor
+   from json_to_recordset (jresult) as x(
+    % for field in proc.get_record_fields():
+        %if field.mode=="OUT":
+           ${field.name} ${field.type}${'' if loop.last else ','}
+        %endif
+     %endfor
+    ) LOOP
+     return next _result;
+    END LOOP;
+%else:
+  RETURNS ${proc.data_type} AS
+  $body$
+  DECLARE
+   jresult JSON;
+  BEGIN
+   jresult=api.tm(
+   json_build_object(
+    'action','${schema}.${proc.name}',
+    'params', json_build_object(
+       % for arg in proc.args:
+         %if arg.mode=="IN":
+          '${arg.name}',${arg.name},
+         %endif
+       %endfor
+      )
+    )
+   );
+
+   return cast(json_extract_path_text(jresult,'result') as boolean);
+
+%endif
+END;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+PARALLEL UNSAFE
+COST 100 ROWS 1000;

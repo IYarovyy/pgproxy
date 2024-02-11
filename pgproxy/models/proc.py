@@ -20,7 +20,7 @@ class Proc:
     __record_fields: List[Arg] = field(default_factory=list)
 
     def get_record_fields(self):
-        if self.data_type.lower() == 'record':
+        if (type(self.data_type) == str) and (self.data_type.lower() == 'record'):
             if len(self.__record_fields) == 0:
                 match = re.search(SELECT_PATTERN, self.definition)
                 if match:
