@@ -1,5 +1,5 @@
-CREATE OR REPLACE PROCEDURE ${schema}.${proc.name}(
-  % for arg in args:
+CREATE OR REPLACE PROCEDURE ${proc.schema}.${proc.name}(
+  % for arg in proc.args:
     %if arg.mode=="IN":
       ${arg.name}, ${arg.type}${'' if loop.last else ','}
     %endif
@@ -14,7 +14,7 @@ CREATE OR REPLACE PROCEDURE ${schema}.${proc.name}(
   BEGIN
    jresult=api.tm(
    json_build_object(
-    'action','${schema}.${proc.name}',
+    'action','${proc.schema}.${proc.name}',
     'params', json_build_object(
      % for arg in proc.args:
        %if arg.mode=="IN":
@@ -48,7 +48,7 @@ CREATE OR REPLACE PROCEDURE ${schema}.${proc.name}(
   BEGIN
    jresult=api.tm(
    json_build_object(
-    'action','${schema}.${proc.name}',
+    'action','${proc.schema}.${proc.name}',
     'params', json_build_object(
        % for arg in proc.args:
          %if arg.mode=="IN":

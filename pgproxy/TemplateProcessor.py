@@ -15,12 +15,11 @@ class TemplateProcessor:
 
     def run(self):
         n = 0
-        scope = {}
+        scope_procs = []
         console = Console()
         for schema in self.db_viewer.schemas():
             procs = self.db_viewer.procs(schema)
             if len(procs) > 0:
-                scope[schema] = {}
                 for root, dirs, files in os.walk(self.in_folder):
                     for file in files:
                         if is_schema_related_only(file):
@@ -37,7 +36,7 @@ class TemplateProcessor:
                         "[bold green]Working on {}.{}...".format(proc.schema, proc.name)):
                     args = self.db_viewer.args(schema, proc)
                     rich_proc = replace(proc, args=args)
-                    scope[schema] = rich_proc
+                    scope_procs.append(rich_proc)
 
                     for root, dirs, files in os.walk(self.in_folder):
                         for file in files:
@@ -49,10 +48,7 @@ class TemplateProcessor:
                                 with open(os.path.join(new_file_path, new_file_name), "w") as new_file:
                                     file_template = Template(filename=os.path.join(root, file))
                                     new_file.write(file_template.render(
-                                        **{SCHEMA: schema,
-                                           PROC: rich_proc,
-                                           ARGS: args,
-                                           }))
+                                        **{PROC: rich_proc}))
                     console.print("{}.{} processed".format(proc.schema, proc.name))
         for root, dirs, files in os.walk(self.in_folder):
             for file in files:
@@ -63,4 +59,4 @@ class TemplateProcessor:
                     os.makedirs(new_file_path, exist_ok=True)
                     with open(os.path.join(new_file_path, new_file_name), "w") as new_file:
                         file_template = Template(filename=os.path.join(root, file))
-                        new_file.write(file_template.render(**{SCOPE: scope}))
+                        new_file.write(file_template.render(**{PROCS: scope_procs}))

@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE api_tm.${schema}_${proc.name}(
+CREATE OR REPLACE PROCEDURE api_tm.${proc.schema}_${proc.name}(
      jparams json
    )
    RETURNS json AS
@@ -16,7 +16,7 @@ CREATE OR REPLACE PROCEDURE api_tm.${schema}_${proc.name}(
             %endfor
          )
          from ${proc.schema}.${proc.name} (
-            % for arg in args:
+            % for arg in proc.args:
               %if arg.mode=="IN":
                 cast(json_extract_path_text(jparams,'${arg.name}'') as ${arg.type})${'' if loop.last else ','}
               %endif

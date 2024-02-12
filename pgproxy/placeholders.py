@@ -1,8 +1,7 @@
 NUMBER = "N"
 SCHEMA = "schema"
 PROC = "proc"
-ARGS = "args"
-SCOPE = "scope"
+PROCS = "procs"
 AFTER_ALL_MARKER = "after-all"
 TMPL_SUFFIX = ".tmpl"
 
