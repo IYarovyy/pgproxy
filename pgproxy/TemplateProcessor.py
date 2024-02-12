@@ -16,8 +16,9 @@ class TemplateProcessor:
     def run(self):
         n = 0
         scope_procs = []
-        console = Console()
+        console = Console(width=60)
         for schema in self.db_viewer.schemas():
+            console.rule("Schema: {}".format(schema))
             procs = self.db_viewer.procs(schema)
             if len(procs) > 0:
                 for root, dirs, files in os.walk(self.in_folder):
@@ -49,7 +50,7 @@ class TemplateProcessor:
                                     file_template = Template(filename=os.path.join(root, file))
                                     new_file.write(file_template.render(
                                         **{PROC: rich_proc}))
-                    console.print("{}.{} processed".format(proc.schema, proc.name))
+                    console.print("[green]:white_heavy_check_mark: {}[/green]".format(proc.name))
         for root, dirs, files in os.walk(self.in_folder):
             for file in files:
                 if is_after_all(file):
