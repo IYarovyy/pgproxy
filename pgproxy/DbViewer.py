@@ -66,7 +66,7 @@ class DbViewer:
             procs = list(map(lambda s: Proc(s[0], s[1], s[2], s[3], s[4]), cursor.fetchall()))
         return procs
 
-    def args(self, schema, proc):
+    def args(self, proc):
         with self.connection.cursor() as cursor:
             cursor.execute("""select 
                                 args.parameter_name::text,
@@ -78,6 +78,6 @@ class DbViewer:
                                       and proc.specific_name = args.specific_name
                             where proc.routine_schema = %s
                                 and (proc.routine_type = 'PROCEDURE' or proc.routine_type = 'FUNCTION')
-                                and (proc.routine_name = %s);""", (schema, proc.name))
+                                and (proc.routine_name = %s);""", (proc.schema, proc.name))
             args = list(map(lambda s: Arg(s[0], s[1], s[2]), cursor.fetchall()))
         return args

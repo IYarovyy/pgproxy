@@ -34,7 +34,7 @@ class TemplateProcessor:
             for proc in procs:
                 with console.status(
                         "[bold green]Working on {}.{}...".format(proc.schema, proc.name)):
-                    args = self.db_viewer.args(schema, proc)
+                    args = self.db_viewer.args(proc)
                     rich_proc = replace(proc, args=args)
                     scope_procs.append(rich_proc)
 
