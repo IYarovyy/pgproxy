@@ -17,24 +17,23 @@ class TemplateProcessor:
         n = 0
         scope_procs = []
         console = Console(width=60)
-        for schema in self.db_viewer.schemas():
-            console.rule("Schema: {}".format(schema))
-            procs = self.db_viewer.procs(schema)
-            if len(procs) > 0:
-                for root, dirs, files in os.walk(self.in_folder):
-                    for file in files:
-                        if is_schema_related_only(file):
-                            n = n + 1
-                            new_file_path = root.replace(self.in_folder, self.out_folder, 1)
-                            new_file_name = interpret_name(file, n, schema)
-                            os.makedirs(new_file_path, exist_ok=True)
-                            with open(os.path.join(new_file_path, new_file_name), "w") as new_file:
-                                file_template = Template(filename=os.path.join(root, file))
-                                new_file.write(file_template.render(**{SCHEMA: schema}))
+        with console.status("[bold green]Working..."):
+            for schema in self.db_viewer.schemas():
+                console.rule("Schema: {}".format(schema))
+                procs = self.db_viewer.procs(schema)
+                if len(procs) > 0:
+                    for root, dirs, files in os.walk(self.in_folder):
+                        for file in files:
+                            if is_schema_related_only(file):
+                                n = n + 1
+                                new_file_path = root.replace(self.in_folder, self.out_folder, 1)
+                                new_file_name = interpret_name(file, n, schema)
+                                os.makedirs(new_file_path, exist_ok=True)
+                                with open(os.path.join(new_file_path, new_file_name), "w") as new_file:
+                                    file_template = Template(filename=os.path.join(root, file))
+                                    new_file.write(file_template.render(**{SCHEMA: schema}))
 
-            for proc in procs:
-                with console.status(
-                        "[bold green]Working on {}.{}...".format(proc.schema, proc.name)):
+                for proc in procs:
                     args = self.db_viewer.args(proc)
                     rich_proc = replace(proc, args=args)
                     scope_procs.append(rich_proc)
@@ -50,14 +49,14 @@ class TemplateProcessor:
                                     file_template = Template(filename=os.path.join(root, file))
                                     new_file.write(file_template.render(
                                         **{PROC: rich_proc}))
-                    console.print("[green]:white_heavy_check_mark: {}[/green]".format(proc.name))
-        for root, dirs, files in os.walk(self.in_folder):
-            for file in files:
-                if is_after_all(file):
-                    n = n + 1
-                    new_file_path = root.replace(self.in_folder, self.out_folder, 1)
-                    new_file_name = interpret_name(file, n)
-                    os.makedirs(new_file_path, exist_ok=True)
-                    with open(os.path.join(new_file_path, new_file_name), "w") as new_file:
-                        file_template = Template(filename=os.path.join(root, file))
-                        new_file.write(file_template.render(**{PROCS: scope_procs}))
+                    console.print("[green]:heavy_check_mark: {}[/green]".format(proc.name))
+            for root, dirs, files in os.walk(self.in_folder):
+                for file in files:
+                    if is_after_all(file):
+                        n = n + 1
+                        new_file_path = root.replace(self.in_folder, self.out_folder, 1)
+                        new_file_name = interpret_name(file, n)
+                        os.makedirs(new_file_path, exist_ok=True)
+                        with open(os.path.join(new_file_path, new_file_name), "w") as new_file:
+                            file_template = Template(filename=os.path.join(root, file))
+                            new_file.write(file_template.render(**{PROCS: scope_procs}))
