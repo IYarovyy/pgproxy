@@ -2,10 +2,11 @@ import re
 from dataclasses import dataclass, field
 from typing import List
 
+from pgproxy.console import err
 from pgproxy.models.arg import Arg
 from dataclasses import replace
 
-DECLARE_PATTERN = r'[Dd][Ee][Cc][Ll][Aa][Rr][Ee]([\w\W]*)[Rr][Ee][Cc][Oo][Rr][Dd]'
+MARKUP_PATTERN = r'---* RESULT FIELDS -* BEGIN --([\w\W]*)---* RESULT FIELDS -* END --'
 SELECT_PATTERN = r'[Ss][Ee][Ll][Ee][Cc][Tt]([\w\W]*)[Ff][Rr][Oo][Mm]'
 
 
@@ -22,7 +23,9 @@ class Proc:
     def get_record_fields(self):
         if (type(self.data_type) == str) and (self.data_type.lower() == 'record'):
             if len(self.__record_fields) == 0:
-                match = re.search(SELECT_PATTERN, self.definition)
+                match = re.search(MARKUP_PATTERN, self.definition)
+                if match is None:
+                    match = re.search(SELECT_PATTERN, self.definition)
                 if match:
                     for rec_field in match.group(1).split(','):
                         name_type = rec_field.strip().split('::')
@@ -36,7 +39,7 @@ class Proc:
                             if in_arg:
                                 self.__record_fields.append(replace(in_arg, mode='OUT'))
                             else:
-                                print('Unknown type of field:{}, proc:{}.{}'.format(name,
+                                err.print('Unknown type of field:{}, proc:{}.{}'.format(name,
                                                                                     self.schema,
                                                                                     self.name))
 

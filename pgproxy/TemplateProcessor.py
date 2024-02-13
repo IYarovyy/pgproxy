@@ -1,8 +1,7 @@
 import os
 from dataclasses import replace
 
-from rich.console import Console
-
+from .console import out
 from .placeholders import *
 from mako.template import Template
 
@@ -16,10 +15,9 @@ class TemplateProcessor:
     def run(self):
         n = 0
         scope_procs = []
-        console = Console(width=60)
-        with console.status("[bold green]Working..."):
+        with out.status("[bold green]Working..."):
             for schema in self.db_viewer.schemas():
-                console.rule("Schema: {}".format(schema))
+                out.rule("Schema: {}".format(schema))
                 procs = self.db_viewer.procs(schema)
                 if len(procs) > 0:
                     for root, dirs, files in os.walk(self.in_folder):
@@ -49,7 +47,7 @@ class TemplateProcessor:
                                     file_template = Template(filename=os.path.join(root, file))
                                     new_file.write(file_template.render(
                                         **{PROC: rich_proc}))
-                    console.print("[green]:heavy_check_mark: {}[/green]".format(proc.name))
+                    out.print("[green]:heavy_check_mark: {}[/green]".format(proc.name))
             for root, dirs, files in os.walk(self.in_folder):
                 for file in files:
                     if is_after_all(file):
