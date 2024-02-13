@@ -9,7 +9,7 @@ readme = "README.md"
 python = "^3.8"
 toml = "^0.10.2"
 click = "^8.1.7"
-psycopg2 = {extras = ["binary"], version = "^2.9.9"}
+#psycopg2 = {extras = ["binary"], version = "^2.9.9"}
 mako = "^1.3.2"
 psycopg2-binary = "^2.9.9"
 rich = "^13.7.0"
