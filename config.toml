@@ -9,9 +9,9 @@ password = ""
 #pattern = "api%"
 #procPattern = "%----%"
 
-[schemas.report]
-#pattern = "common%"
-#proc = ["one", "common_user_insert"]
+[schemas.dict]
+#pattern = "get_user_zahid_list"
+proc = ["get_user_zahid_list"]
 
 #[schemas.doc]
 #[schemas.perm]
